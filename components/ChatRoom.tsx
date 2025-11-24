@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Topic, Message } from '../types';
-import { subscribeToMessages, sendMessage, closeTopic, subscribeToTopics } from '../lib/firebase';
+import { subscribeToMessages, sendMessage, closeTopic } from '../lib/firebase';
 import { generateGuestId, formatDate, cn } from '../lib/utils';
 import { ArrowLeft, Send, Hash, Loader2 } from 'lucide-react';
 
@@ -15,7 +15,6 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const [currentTopic, setCurrentTopic] = useState<Topic>(topic);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const guestId = generateGuestId();
 
@@ -27,16 +26,6 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
     return () => unsubscribe();
   }, [topic.id]);
 
-  // Keep topic state in sync in case it is closed/updated elsewhere
-  useEffect(() => {
-    setCurrentTopic(topic);
-    const unsub = subscribeToTopics((topics) => {
-      const t = topics.find((x) => x.id === topic.id);
-      if (t) setCurrentTopic(t);
-    });
-    return () => unsub();
-  }, [topic.id]);
-
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -44,7 +33,6 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
-    if (currentTopic?.closed) return;
 
     setIsSending(true);
     try {
@@ -77,23 +65,23 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
           </div>
           <p className="text-xs text-gray-500 line-clamp-1">{topic.description}</p>
           <div className="text-xs text-gray-400 mt-1">
-            <span className="font-medium text-gray-700">Created by</span>
-            <span className="ml-2">{topic.ownerName || topic.ownerId || 'Anonymous'}</span>
+            <span className="font-medium text-gray-700">Dibuat oleh</span>
+            <span className="ml-2">{topic.ownerName || topic.ownerId || 'Anonim'}</span>
           </div>
         </div>
         <div className="ml-auto">
           {!topic.closed && topic.ownerId === guestId && (
             <button
               onClick={async () => {
-                if (!confirm('Close this topic? This will prevent further messages.')) return;
+                if (!confirm('Tutup topik ini? Ini akan mencegah pesan baru.')) return;
                 setIsClosing(true);
                 try {
                   await closeTopic(topic.id, guestId);
                   // navigate back to list so user sees updated state
                   onBack();
                 } catch (err) {
-                  console.error('Failed to close topic', err);
-                  alert('Failed to close topic.');
+                  console.error('Gagal menutup topik', err);
+                  alert('Gagal menutup topik.');
                 } finally {
                   setIsClosing(false);
                 }
@@ -101,7 +89,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
               disabled={isClosing}
               className="px-3 py-1 bg-red-50 text-red-600 border border-red-100 rounded-md text-sm hover:bg-red-100 disabled:opacity-50"
             >
-              {isClosing ? 'Closing...' : 'Close Topic'}
+              {isClosing ? 'Menutup...' : 'Tutup Topik'}
             </button>
           )}
         </div>
@@ -109,19 +97,14 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
-        {currentTopic?.closed && (
-          <div className="w-full text-center text-sm text-red-600 bg-red-50 border border-red-100 px-4 py-2 rounded-md">
-            This topic is closed — new messages are disabled.
-          </div>
-        )}
-            {isLoading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
           </div>
         ) : messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-50">
             <MessageSquarePlaceholder />
-            <p className="mt-2 text-sm">No messages yet. Say hello!</p>
+            <p className="mt-2 text-sm">Belum ada pesan. Sapa sekarang!</p>
           </div>
         ) : (
           messages.map((msg) => {
@@ -166,13 +149,13 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({ topic, onBack }) => {
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={`Message #${topic.title}...`}
+                placeholder={`Pesan #${topic.title}...`}
             className="flex-1 pl-4 pr-12 py-3 bg-gray-100 border-0 rounded-full text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all outline-none"
-            disabled={isSending || !!currentTopic?.closed}
+            disabled={isSending || !!topic.closed}
           />
           <button
             type="submit"
-            disabled={!newMessage.trim() || isSending || !!currentTopic?.closed}
+            disabled={!newMessage.trim() || isSending || !!topic.closed}
             className="absolute right-2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-colors"
           >
             {isSending ? (

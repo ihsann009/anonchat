@@ -13,8 +13,8 @@ export const TopicList: React.FC<TopicListProps> = ({ topics, onSelectTopic }) =
     return (
       <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-dashed border-gray-300">
         <Hash className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900">No topics yet</h3>
-        <p className="text-gray-500">Be the first to start a conversation!</p>
+        <h3 className="text-lg font-medium text-gray-900">Belum ada topik</h3>
+        <p className="text-gray-500">Jadilah orang pertama yang memulai percakapan!</p>
       </div>
     );
   }
@@ -39,7 +39,7 @@ export const TopicList: React.FC<TopicListProps> = ({ topics, onSelectTopic }) =
               topic.closed ? "text-gray-500 bg-gray-50" : "text-gray-400 bg-gray-50"
             )}>
               <MessageCircle className="w-3 h-3 mr-1" />
-              <span>{topic.closed ? 'Closed' : 'Active'}</span>
+              <span>{topic.closed ? 'Ditutup' : 'Aktif'}</span>
             </div>
           </div>
           
@@ -48,16 +48,16 @@ export const TopicList: React.FC<TopicListProps> = ({ topics, onSelectTopic }) =
           </h3>
           
           <p className="text-sm text-gray-500 line-clamp-2 text-left w-full mb-2 h-10">
-            {topic.description || "No description provided."}
+            {topic.description || "Tidak ada deskripsi."}
           </p>
 
           <div className="text-xs text-gray-400 w-full mb-4">
-            <span className="font-medium text-gray-700">Created by</span>
-            <span className="ml-2">{topic.ownerName || topic.ownerId || 'Anonymous'}</span>
+            <span className="font-medium text-gray-700">Dibuat oleh</span>
+            <span className="ml-2">{topic.ownerName || topic.ownerId || 'Anonim'}</span>
           </div>
 
           <div className="mt-auto w-full flex items-center text-sm font-medium text-indigo-600 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
-            Join Discussion <ChevronRight className="w-4 h-4 ml-1" />
+            Ikut Gabung <ChevronRight className="w-4 h-4 ml-1" />
           </div>
         </button>
       ))}
