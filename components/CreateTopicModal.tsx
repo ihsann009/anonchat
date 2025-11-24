@@ -63,7 +63,7 @@ export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onCl
               maxLength={40}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="mis., Pikiran Larut Malam"
+              placeholder="Masukkan Topik"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
             />
           </div>
@@ -74,7 +74,7 @@ export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onCl
               maxLength={100}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Apa topik ini tentang?"
+              placeholder="Tambahkan Deskripsi..."
               rows={3}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none"
             />
@@ -87,7 +87,7 @@ export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onCl
               maxLength={30}
               value={creatorName}
               onChange={(e) => setCreatorName(e.target.value)}
-              placeholder="mis., Alex"
+              placeholder="Isi nama Anda (opsional)"
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
             />
           </div>
