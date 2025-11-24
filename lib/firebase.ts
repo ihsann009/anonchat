@@ -8,6 +8,7 @@ import {
   onSnapshot,
   Timestamp,
   doc,
+  updateDoc,
   getDoc,
   serverTimestamp
 } from 'firebase/firestore';
@@ -36,9 +37,9 @@ if (isFirebaseConfigured) {
 // --- MOCK DATA STORE (For Demo when no Firebase keys) ---
 class MockStore {
   topics: Topic[] = [
-    { id: '1', title: 'Welcome Lounge', description: 'Introduce yourself!', createdAt: Date.now() - 100000, messageCount: 5 },
-    { id: '2', title: 'Tech Talk', description: 'Discuss the latest in tech.', createdAt: Date.now() - 50000, messageCount: 12 },
-    { id: '3', title: 'Random', description: 'Anything goes.', createdAt: Date.now(), messageCount: 2 }
+    { id: '1', title: 'Welcome Lounge', description: 'Introduce yourself!', createdAt: Date.now() - 100000, messageCount: 5, ownerId: 'guest_12345', ownerName: 'Alex' },
+    { id: '2', title: 'Tech Talk', description: 'Discuss the latest in tech.', createdAt: Date.now() - 50000, messageCount: 12, ownerId: 'guest_22222', ownerName: 'DevSam' },
+    { id: '3', title: 'Random', description: 'Anything goes.', createdAt: Date.now(), messageCount: 2, ownerId: 'guest_99999', ownerName: 'Guest' }
   ];
   messages: Record<string, Message[]> = {
     '1': [
@@ -74,6 +75,18 @@ class MockStore {
     this.notify('topics', this.topics);
   }
 
+  closeTopic(topicId: string, requestedBy?: string) {
+    const t = this.topics.find((x) => x.id === topicId);
+    if (!t) return;
+    // allow close only if requester is owner (or no owner set for backwards compatibility)
+    if (t.ownerId && requestedBy && t.ownerId !== requestedBy) {
+      // ignore unauthorized close in mock (could throw or return false)
+      return;
+    }
+    (t as any).closed = true;
+    this.notify('topics', this.topics);
+  }
+
   addMessage(topicId: string, message: Omit<Message, 'id' | 'timestamp'>) {
     const newMessage = { ...message, id: Math.random().toString(36).substr(2, 9), timestamp: Date.now() };
     if (!this.messages[topicId]) this.messages[topicId] = [];
@@ -98,16 +111,18 @@ export const subscribeToTopics = (callback: (topics: Topic[]) => void) => {
   }
 };
 
-export const createTopic = async (title: string, description: string) => {
+export const createTopic = async (title: string, description: string, ownerId?: string, ownerName?: string) => {
   if (isFirebaseConfigured) {
     await addDoc(collection(db, 'topics'), {
       title,
       description,
       createdAt: serverTimestamp(),
-      messageCount: 0
+      messageCount: 0,
+      ownerId: ownerId || null,
+      ownerName: ownerName || null
     });
   } else {
-    mockStore.addTopic({ title, description });
+    mockStore.addTopic({ title, description, ownerId, ownerName });
   }
 };
 
@@ -139,5 +154,14 @@ export const sendMessage = async (topicId: string, text: string, senderId: strin
     });
   } else {
     mockStore.addMessage(topicId, { topicId, text, senderId });
+  }
+};
+
+export const closeTopic = async (topicId: string, requestedBy?: string) => {
+  if (isFirebaseConfigured) {
+    // In a real app, enforce via security rules; here we optimistically set closed flag.
+    await updateDoc(doc(db, 'topics', topicId), { closed: true });
+  } else {
+    mockStore.closeTopic(topicId, requestedBy);
   }
 };

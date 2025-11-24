@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { X, Plus, Loader2 } from 'lucide-react';
 import { createTopic } from '../lib/firebase';
+import { generateGuestId } from '../lib/utils';
+import { useState } from 'react';
 
 interface CreateTopicModalProps {
   isOpen: boolean;
@@ -10,6 +12,13 @@ interface CreateTopicModalProps {
 export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [creatorName, setCreatorName] = useState(() => {
+    try {
+      return localStorage.getItem('anon_guest_name') || '';
+    } catch (e) {
+      return '';
+    }
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -20,7 +29,11 @@ export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onCl
 
     setIsSubmitting(true);
     try {
-      await createTopic(title, description);
+      const ownerId = generateGuestId();
+      const ownerName = creatorName?.trim() || ownerId;
+      // persist name locally for future topics
+      try { if (creatorName?.trim()) localStorage.setItem('anon_guest_name', creatorName.trim()); } catch {}
+      await createTopic(title, description, ownerId, ownerName);
       setTitle('');
       setDescription('');
       onClose();
@@ -64,6 +77,18 @@ export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onCl
               placeholder="What is this topic about?"
               rows={3}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Your name (optional)</label>
+            <input
+              type="text"
+              maxLength={30}
+              value={creatorName}
+              onChange={(e) => setCreatorName(e.target.value)}
+              placeholder="e.g., Alex"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
             />
           </div>
 

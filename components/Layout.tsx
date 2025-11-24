@@ -17,7 +17,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="bg-indigo-600 p-2 rounded-lg">
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-gray-900">AnonChat</h1>
+            <h1 className="text-xl font-bold tracking-tight text-gray-900">AnonChat </h1>
           </div>
           
           <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
@@ -33,7 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       <footer className="bg-white border-t py-4 mt-auto">
         <div className="max-w-4xl mx-auto px-4 text-center text-xs text-gray-400">
-          <p>Anonymous Chat • Messages are public • Be nice</p>
+          <p>Anonymous Chat • Messages are public • Be nice • Muhammad Ihsan/13020221065</p>
         </div>
       </footer>
     </div>

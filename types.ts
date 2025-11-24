@@ -4,6 +4,9 @@ export interface Topic {
   description: string;
   createdAt: number;
   messageCount?: number;
+  closed?: boolean;
+  ownerId?: string;
+  ownerName?: string;
 }
 
 export interface Message {
