@@ -1,0 +1,91 @@
+import React, { useState } from 'react';
+import { X, Plus, Loader2 } from 'lucide-react';
+import { createTopic } from '../lib/firebase';
+
+interface CreateTopicModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const CreateTopicModal: React.FC<CreateTopicModalProps> = ({ isOpen, onClose }) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      await createTopic(title, description);
+      setTitle('');
+      setDescription('');
+      onClose();
+    } catch (error) {
+      console.error("Failed to create topic", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-900">New Topic</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Topic Title</label>
+            <input
+              type="text"
+              required
+              maxLength={40}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Late Night Thoughts"
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+            <textarea
+              maxLength={100}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What is this topic about?"
+              rows={3}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all resize-none"
+            />
+          </div>
+
+          <div className="pt-2 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !title.trim()}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+              Create Topic
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};

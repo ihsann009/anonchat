@@ -1,0 +1,5 @@
+{
+  "name": "AnonChat",
+  "description": "An anonymous real-time chat application with topic channels, built with React, TypeScript, Tailwind CSS, and Firebase Firestore integration.",
+  "requestFramePermissions": []
+}
